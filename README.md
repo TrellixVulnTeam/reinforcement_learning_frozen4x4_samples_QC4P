@@ -29,3 +29,5 @@ __reward function__
 ### Monte carlo 
 ![monte carlo iteration pseudocode](./images/monte_carlo.jpg)
 
+### Q-learning
+![monte carlo iteration pseudocode](./images/q-learning.jpg)
