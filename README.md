@@ -30,6 +30,10 @@ if you step on starting point reward == 0
 ### Monte carlo 
 ![monte carlo iteration pseudocode](./images/monte_carlo.jpg)
 
+#### Statistic after 30000 episodes:
+![](./images/monte_carlo_plot.jpg)
+
+
 ### Q-learning
 ![monte carlo iteration pseudocode](./images/q-learning.jpg)
 My implementation of algorithm use q-learning decay extension, 
@@ -44,3 +48,6 @@ if epsilon >= epsilon_min {
   epsilon *= epsilon decay
 }
 ```
+#### Statistic after 30000 episodes:
+![](./images/q_learning_plot.jpg)
+

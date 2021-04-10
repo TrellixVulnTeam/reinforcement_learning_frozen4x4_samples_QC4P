@@ -1,6 +1,7 @@
 import time
 import gym
 import csv
+import matplotlib.pyplot as plt
 
 '''
 Utils for frozen lake
@@ -8,7 +9,6 @@ Utils for frozen lake
 
 class Utils:
     @staticmethod
-
     def test_game(env, policy, sleep=False):
         """
         start one game with visualization
@@ -83,7 +83,20 @@ class Utils:
                 policy_dict[row[0]] = row[1:]
         return policy_dict
 
+    @staticmethod
+    def build_average_reward_length_plots(logs):
+        avgs = []
+        lens = []
+        for index, reward in enumerate(logs):
+            length = len(reward)
+            avg = sum(reward) / length
+            avgs.append(avg)
+            lens.append(length)
 
-if __name__ == '__main__':
-    Utils().create_csv({0: [0.2, 0.2, 0.2, 0.2], 5: [0.2, 0.2, 0.2, 0.2]}, "hi.csv")
-    Utils().read("hi.csv")
+        fig, axs = plt.subplots(1, 2)
+        axs[0].plot(avgs)
+        axs[0].set_title('Average Reward per Episode')
+        axs[1].plot(lens, 'tab:orange')
+        axs[1].set_title('Episode_Length')
+        plt.show()
+

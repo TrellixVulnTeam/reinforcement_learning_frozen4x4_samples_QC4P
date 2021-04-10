@@ -25,6 +25,8 @@ class QLearning:
         self._epsilon_min = epsilon_min
         self._epsilon_decay = epsilon_decay
 
+        self.episode_logs = []  # 2d array with episodes reward by step
+
     def train(self, episode=10000):
         """
 
@@ -49,8 +51,10 @@ class QLearning:
         train on episode
         """
         state = self._env.reset()
-
         is_done = False
+
+        # param for logs
+        episode_rewards = []
 
         while not is_done:
             action = self._propose_action(state)  # get action
@@ -58,6 +62,12 @@ class QLearning:
 
             self._learn(state, new_state, action, reward)
             state = new_state
+
+            # logging
+            episode_rewards.append(reward)
+
+        # add logs of episode to logs
+        self.episode_logs.append(episode_rewards)
 
         # reduce _epsilon
         if self._epsilon >= self._epsilon_min:

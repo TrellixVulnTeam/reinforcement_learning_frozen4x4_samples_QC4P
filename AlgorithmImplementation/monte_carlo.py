@@ -5,6 +5,10 @@ import gym
 '''
 Monte carlo on policy first visit
 '''
+
+
+
+
 class MonteCarloOnPolicyFirstVisit:
     def __init__(self, env, gamma=0.9, epsilon=0.2):
         self._env = env
@@ -12,6 +16,10 @@ class MonteCarloOnPolicyFirstVisit:
         self._epsilon = epsilon
         self._N_STATES = env.env.nS
         self._N_ACTIONS = env.env.nA
+
+        self.episode_logs = []  # 2d array with episodes reward by step
+
+
 
     def train(self, episodes=10000):
         """
@@ -24,7 +32,7 @@ class MonteCarloOnPolicyFirstVisit:
 
         for ep_counter in range(episodes):  # repeat for each episode
             if ep_counter % 1000 == 0:
-                print(ep_counter)
+                print("Episode No: {}".format(ep_counter))
 
             episode = self._generate_episode()  # generate policy
 
@@ -92,13 +100,18 @@ class MonteCarloOnPolicyFirstVisit:
 
         self._env.reset()
 
+        # log params
+        episode_rewards = []
+
         while not game_over:
             state = self._env.env.s
 
             timestep = []
             timestep.append(state)
 
+            # generate random value from 0 to 1
             n = random.uniform(0, sum(self.policy[state].values()))
+
             top_range = 0
             for prob in self.policy[state].items():
                 top_range += prob[1]
@@ -114,6 +127,11 @@ class MonteCarloOnPolicyFirstVisit:
             timestep.append(reward)
             episode.append(timestep)
 
+            # log data
+            episode_rewards.append(reward)
+
+
+        self.episode_logs.append(episode_rewards)
         return episode
 
     def _create_random_policy(self):
