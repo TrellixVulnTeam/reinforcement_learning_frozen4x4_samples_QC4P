@@ -2,7 +2,9 @@ import random
 import numpy as np
 import gym
 
-
+'''
+Monte carlo on policy first visit
+'''
 class MonteCarloOnPolicyFirstVisit:
     def __init__(self, env, gamma=0.9, epsilon=0.2):
         self.env = env
@@ -27,7 +29,6 @@ class MonteCarloOnPolicyFirstVisit:
             episode = self._generate_episode()  # generate policy
 
             self._train_on_episode(episode)  # train on episode
-        print(self.policy)
         return self._create_dictionary_state_best_action()
 
     '''

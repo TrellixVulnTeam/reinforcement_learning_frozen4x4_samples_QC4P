@@ -4,10 +4,21 @@ import numpy as np
 import time
 import Utils
 
-
+'''
+Q-decay learning
+'''
 class QLearning:
     def __init__(self, env, gamma=0.8, epsilon=1, learning_rate=0.1,
                  epsilon_min=0.01, epsilon_decay=0.99995):
+        """
+
+        :param env: gym env
+        :param gamma: discount factor
+        :param epsilon: e-policy threshold
+        :param learning_rate:
+        :param epsilon_min: minimum epsilon value
+        :param epsilon_decay:
+        """
         self.env = env
         self.N_STATES = env.env.nS
         self.N_ACTIONS = env.env.nA
@@ -33,8 +44,13 @@ class QLearning:
         return self._transform_q_table_to_dict()
 
 
-
+    '''
+    private methods
+    '''
     def _train_episode(self):
+        """
+        train on episode
+        """
         state = self.env.reset()
 
         is_done = False
