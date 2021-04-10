@@ -1,84 +1,149 @@
-import gym
+import random
 import numpy as np
+import gym
 
 
-class MonteCarlo:
-    def __init__(self, env):
+class MonteCarloOnPolicyFirstVisit:
+    def __init__(self, env, gamma=0.9, epsilon=0.2):
+        self.env = env
+        self.gamma = gamma
+        self.epsilon = epsilon
         self.N_STATES = env.env.nS
         self.N_ACTIONS = env.env.nA
-        self.trans_probs = env.env.P
-        self.env = env
 
-    def monte_carlo(self, episodes_count=10000, gamma=0.8, epsilon=0.2):
+    def train(self, episodes=10000):
         """
 
-        :param episodes_count: count of episodes
-        :param gamma: discount factor
-        :param epsilon:
+        :param episodes: count of episodes
         :return: optimal policy
         """
-        self._init_monte_carlo()
 
-        # iterate for each episode
-        for _ in range(episodes_count):
+        self._initialize_params()
 
-            # generate an episode policy
-            ep_policy = self._generate_policy()  # [[s, a, r]...]
-            print(ep_policy)
-            G = 0  # initialize G ()
+        for ep_counter in range(episodes):  # repeat for each episode
+            if ep_counter % 1000 == 0:
+                print(ep_counter)
 
-            # iterate for each step of episode
-            for t in reversed(range(len(ep_policy))):
-                G = self._calculate_new_G(G, gamma, ep_policy[t][2])
+            episode = self._generate_episode()  # generate policy
 
-                # check is S[t] and A[t] wasn't in previously policys in current episode
-                if (ep_policy[t][0], ep_policy[t][1]) not in [(prev_policy[0], prev_policy[1]) for prev_policy in
-                                                              ep_policy[:t]]:
-                    self._add_G_to_returns(G, ep_policy[t][0], ep_policy[t][1])
-                    self.Q[ep_policy[t][0]][ep_policy[t][1]] = sum(self.returns[(ep_policy[t][0], ep_policy[t][1])]) / \
-                                                               len(self.returns[(ep_policy[t][0], ep_policy[t][1])])
-                    A_ = np.argmax(self.Q[ep_policy[t][0]])
+            self._train_on_episode(episode)  # train on episode
+        print(self.policy)
+        return self._create_dictionary_state_best_action()
 
-                    self.pi[ep_policy[t][0]] = epsilon / self.N_ACTIONS
-                    self.pi[ep_policy[t][0]][A_] += 1 - epsilon
+    '''
+    private methods
+    '''
+    def _create_dictionary_state_best_action(self):
+        dict = {}
+        for key in self.policy:
+            v = []
+            for act_key in self.policy[key]:
+                v.append(self.policy[key][act_key])
 
-        for s in range(self.N_STATES):
-            print("S{}: {}".format(s, np.argmax(self.pi[s])))
+            dict[key] = np.argmax(v)
+        return dict
 
-        return self.pi
+    def _train_on_episode(self, episode):
+        G = 0  # initialize cumulative discounted reward
+        episode.reverse()
+        length = len(episode)
 
-    def _generate_policy(self):
+        for t in range(length-1):
+            s_t, a_t, r_t = episode[t]  # get state, action and reward of t episode
+            _, _, r_t_plus = episode[t+1]
+            G += self.gamma*G + r_t_plus   # update G
+
+            state_action = (s_t, a_t)
+
+            # check is (state, action) was prev in episode
+            if state_action not in [(x[0], x[1]) for x in episode[0:t]]:  # if not then
+
+                # append G to returns
+                if self.returns.get(state_action):
+                    self.returns[state_action].append(G)
+                else:
+                    self.returns[state_action] = [G]
+
+                # Q(s, a) <- average returns for (state, action)
+                self.Q[s_t][a_t] = sum(self.returns[state_action]) \
+                                   / len(self.returns[state_action])
+
+                # get A_star (max action value for state)
+                Q_list = list(map(lambda x: x[1], self.Q[s_t].items()))
+                indices = [i for i, x in enumerate(Q_list) if x == max(Q_list)]
+                A_star = random.choice(indices)
+
+                # calculate new policy
+                for a in self.policy[s_t].items():
+                    if a[0] == A_star:
+                        self.policy[s_t][a[0]] = 1 - self.epsilon + (self.epsilon / abs(sum(self.policy[s_t].values())))
+                    else:
+                        self.policy[s_t][a[0]] = (self.epsilon / abs(sum(self.policy[s_t].values())))
+
+    def _generate_episode(self):
         """
-        generate random policy
-        :return: 2D array with [obs, action, reward, dont]
+        generate episode based on current policy
+        :param policy: current policy
+        :return: 2d array ([[state, action, reward]])
         """
-        episode_policy = list()
+        episode = []
+        game_over = False
+
         self.env.reset()
-        while True:
-            action = self.env.action_space.sample()
-            obs, reward, done, _ = self.env.step(action)  # obs, reward, done, info
-            episode_policy.append([obs, action, reward, done])
-            self.env.render()
-            if done:
-                return episode_policy
 
-    def _init_monte_carlo(self):
-        self.Q = np.zeros([self.N_STATES, self.N_ACTIONS])
-        self.returns = dict()  # with key tuple of (state, action)
-        self.pi = np.full((self.N_STATES, self.N_ACTIONS), 0.25)
+        while not game_over:
+            state = self.env.env.s
 
-    def _calculate_new_G(self, G, gamma, r):
-        return gamma * G + r
+            timestep = []
+            timestep.append(state)
 
-    def _add_G_to_returns(self, G, state, action):
-        if (state, action) in self.returns.keys():
-            self.returns[(state, action)].append(G)
-        else:
-            self.returns[(state, action)] = [G]
+            n = random.uniform(0, sum(self.policy[state].values()))
+            top_range = 0
+            for prob in self.policy[state].items():
+                top_range += prob[1]
+                if n < top_range:
+                    action = prob[0]
+                    break
 
 
-if __name__ == '__main__':
-    env = gym.make('FrozenLake-v0')
-    env.reset()
-    monte_carlo = MonteCarlo(env)
-    monte_carlo.monte_carlo()
+            _, reward, game_over, _ = self.env.step(action)
+            # self.env.render()
+
+            timestep.append(action)
+            timestep.append(reward)
+            episode.append(timestep)
+
+        return episode
+
+    def _create_random_policy(self):
+        """
+        :return: arbitrary policy
+        """
+        policy = {}
+
+        for key in range(self.N_STATES):
+            p = {}
+            for action in range(self.N_ACTIONS):
+                p[action] = 1 / self.N_ACTIONS
+            policy[key] = p
+        return policy
+
+    def _create_state_action_dictionary(self, policy):
+        """
+        :param policy: arbitrary policy
+        :return: state action dictionary
+        """
+        Q = {}
+        for key in policy.keys():
+            Q[key] = {a: 0.0 for a in range(self.N_ACTIONS)}
+        return Q
+
+    def _initialize_params(self):
+        """
+        initialize returns, policy and state action table (as dictionary)
+        """
+        self.policy = self._create_random_policy()
+        self.Q = self._create_state_action_dictionary(self.policy)
+        self.returns = {}
+
+
