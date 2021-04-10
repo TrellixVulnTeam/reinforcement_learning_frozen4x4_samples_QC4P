@@ -2,4 +2,4 @@
 ### Value iteration 
 
 
-![p][/images/value_iteration.jpg]
+![p](value_iteration.jpg)
