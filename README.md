@@ -2,4 +2,7 @@
 ### Value iteration 
 
 
-![p](value_iteration.jpg)
+![](value_iteration.jpg)
+
+### Monte carlo 
+![](monte_carlo.jpg)
