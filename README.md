@@ -2,3 +2,4 @@
 ### Value iteration 
 
 
+![p][/images/value_iteration.jpg]
