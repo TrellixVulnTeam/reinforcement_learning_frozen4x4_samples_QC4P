@@ -12,7 +12,7 @@ class Utils:
     def test_game(env, policy, sleep=False):
         """
         start one game with visualization
-        :param env: gym env
+        :param env: gym _env
         :param policy: policy in dict format {state: best action}
         :param sleep: turn on/off visualization
         :return: game reward
@@ -39,9 +39,10 @@ class Utils:
     def test_on_eps(env, policy, episodes):
         """
         test algorithm on count of eps, and print results
-        :param env: gym env
+        :param env: gym _env
         :param policy: policy in dict format {state: best action}
         :param episodes: the number of episodes on which the algorithm is testing
+        :returns wins, episodes
         """
         wins = 0
 
@@ -52,6 +53,7 @@ class Utils:
                 wins += 1
 
         print("Won {} out of {} episodes".format(wins, episodes))
+        return wins, episodes
 
     @staticmethod
     def create_csv(policy, name):
