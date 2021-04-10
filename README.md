@@ -2,7 +2,7 @@
 ### Value iteration 
 
 
-![value iteration pseudocode](value_iteration.jpg=500)
+![value iteration pseudocode](./images/value_iteration.jpg=500)
 
 ### Monte carlo 
-![value iteration pseudocode](monte_carlo.jpg=500)
+![monte carlo iteration pseudocode](./images/monte_carlo.jpg=500)
