@@ -66,7 +66,7 @@ class Utils:
             writer = csv.writer(file)
             for key in policy.keys():
                 row = [key]
-                row.extend(policy[key])
+                row.append(policy[key])
                 writer.writerow(row)
 
     @staticmethod

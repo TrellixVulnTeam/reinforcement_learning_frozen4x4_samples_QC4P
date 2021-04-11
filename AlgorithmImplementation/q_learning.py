@@ -27,17 +27,15 @@ class QLearning:
 
         self.episode_logs = []  # 2d array with episodes reward by step
 
-    def train(self, episode=10000):
+    def train(self, episodes=10000):
         """
 
-        :param episode: count of episodes
+        :param episodes: count of episodes
         :return: best action for state dict
         """
         self._create_state_action_dictionary()
 
-        for ep_counter in range(episode):
-            if ep_counter % 1000 == 0:
-                print("Episode No: {}".format(ep_counter))
+        for ep_counter in range(episodes):
             self._train_episode()
 
         return self._transform_q_table_to_dict()

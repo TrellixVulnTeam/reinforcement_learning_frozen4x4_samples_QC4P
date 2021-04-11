@@ -3,14 +3,15 @@ import numpy as np
 import gym
 
 '''
-Monte carlo on policy first visit
+Monte carlo on policy first visit control
+!!! This algorithm doesn't work
 '''
 
 
 
 
-class MonteCarloOnPolicyFirstVisit:
-    def __init__(self, env, gamma=0.9, epsilon=0.2):
+class MonteCarloOnPolicyFirstVisitControl:
+    def __init__(self, env, gamma=0.98, epsilon=0.2):
         self._env = env
         self._gamma = gamma
         self._epsilon = epsilon
@@ -27,12 +28,11 @@ class MonteCarloOnPolicyFirstVisit:
         :param episodes: count of episodes
         :return: optimal policy
         """
-
         self._initialize_params()
 
         for ep_counter in range(episodes):  # repeat for each episode
             if ep_counter % 1000 == 0:
-                print("Episode No: {}".format(ep_counter))
+                print("Episode No {}".format(ep_counter))
 
             episode = self._generate_episode()  # generate policy
 
@@ -54,13 +54,13 @@ class MonteCarloOnPolicyFirstVisit:
 
     def _train_on_episode(self, episode):
         G = 0  # initialize cumulative discounted reward
+
         episode.reverse()
         length = len(episode)
 
-        for t in range(length-1):
+        for t in range(length):
             s_t, a_t, r_t = episode[t]  # get state, action and reward of t episode
-            _, _, r_t_plus = episode[t+1]
-            G += self._gamma * G + r_t_plus   # update G
+            G = self._gamma * G + r_t   # update G
 
             state_action = (s_t, a_t)
 
@@ -109,7 +109,7 @@ class MonteCarloOnPolicyFirstVisit:
             timestep = []
             timestep.append(state)
 
-            # generate random value from 0 to 1
+
             n = random.uniform(0, sum(self.policy[state].values()))
 
             top_range = 0
@@ -121,7 +121,6 @@ class MonteCarloOnPolicyFirstVisit:
 
 
             _, reward, game_over, _ = self._env.step(action)
-            # self._env.render()
 
             timestep.append(action)
             timestep.append(reward)
@@ -133,6 +132,8 @@ class MonteCarloOnPolicyFirstVisit:
 
         self.episode_logs.append(episode_rewards)
         return episode
+
+
 
     def _create_random_policy(self):
         """
